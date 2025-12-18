@@ -1,0 +1,87 @@
+body {
+    font-family: 'Inter', sans-serif;
+}
+
+.gauge-container-large {
+    width: 220px;
+    height: 220px;
+    position: relative;
+}
+
+.gauge-container-small {
+    width: 120px;
+    height: 120px;
+    position: relative;
+}
+
+.gauge-background,
+.gauge-arc {
+    stroke-width: 12;
+    fill: none;
+    transition: stroke-dasharray 0.2s ease-out, stroke 0.2s ease-out;
+    transform: rotate(135deg);
+    transform-origin: 50% 50%;
+}
+
+.gauge-background {
+    stroke: url(#bgGradient);
+}
+
+.gauge-arc {
+    stroke-linecap: round;
+}
+
+.fade-in-text {
+    animation: fade-in 1s ease-in-out;
+}
+
+@keyframes fade-in {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+.gradient-text {
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-image: linear-gradient(90deg, #38A169, #48BB78);
+}
+
+.gauge-center {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.gauge-bottom {
+    position: absolute;
+    bottom: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.active-state {
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.5;
+    }
+}
