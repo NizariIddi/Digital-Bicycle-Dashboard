@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bicycle Dashboard</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Inter Font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+    }
+    .gauge-container-large {
+      width: 220px;
+      height: 220px;
+      position: relative;
+    }
+    .gauge-container-small {
+      width: 120px;
+      height: 120px;
+      position: relative;
+    }
+    .gauge-background, .gauge-arc {
+      stroke-width: 12;
+      fill: none;
+      transition: stroke-dasharray 0.2s ease-out, stroke 0.2s ease-out;
+      transform: rotate(135deg);
+      transform-origin: 50% 50%;
+    }
+    .gauge-background { 
+      stroke: url(#bgGradient); 
+    }
+    .gauge-arc { stroke-linecap: round; }
+    .fade-in-text { animation: fade-in 1s ease-in-out; }
+    @keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
+    .gradient-text {
+      background-clip: text;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-image: linear-gradient(90deg, #38A169, #48BB78);
+    }
+    .gauge-center {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    .gauge-bottom {
+      position: absolute;
+      bottom: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+    .active-state {
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+  </style>
+</head>
+<body class="bg-slate-950 text-white flex items-center justify-center min-h-screen p-4 overflow-hidden">
+
+<div id="dashboard" class="flex flex-col items-center space-y-10 w-full max-w-4xl fade-in-text">
+  <h1 class="text-4xl sm:text-5xl font-extrabold text-center gradient-text tracking-wider">Dashboard</h1>
+
+  <div class="flex flex-col sm:flex-row items-center justify-center sm:space-x-6 w-full">
+
+    <!-- Distance Gauge -->
+    <div class="relative flex flex-col items-center justify-center w-full sm:w-auto mt-8 sm:mt-0">
+      <div class="absolute -top-10 flex items-center space-x-2 text-gray-500 font-medium">
+        <div id="gps-indicator" class="w-3 h-3 rounded-full bg-red-500"></div>
+        <p id="gps-text">GPS</p>
+      </div>
+      <div class="gauge-container-small mb-2">
+        <svg viewBox="0 0 100 100">
+          <defs>
+            <linearGradient id="distanceGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stop-color="#38A169"/>
+              <stop offset="100%" stop-color="#48BB78"/>
+            </linearGradient>
+            <radialGradient id="bgGradient" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stop-color="#1f2937"/>
+              <stop offset="100%" stop-color="#2d3748"/>
+            </radialGradient>
+          </defs>
+          <circle class="gauge-background" cx="50" cy="50" r="45" pathLength="100"></circle>
+          <circle id="distance-arc" class="gauge-arc" cx="50" cy="50" r="45" pathLength="100" stroke="url(#distanceGradient)"></circle>
+        </svg>
+        <div class="gauge-center">
+          <p id="distance-value" class="text-3xl font-bold text-green-400">0</p>
+          <p class="text-sm text-gray-400 mt-1 font-medium">km</p>
+        </div>
+      </div>
+      <p class="mt-4 text-xs text-gray-400 font-semibold">Distance</p>
+      <button id="unit-toggle" class="bg-slate-700 text-white font-bold p-3 rounded-full shadow-lg hover:bg-slate-600 transition-colors duration-200 mt-4">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M4 4v5h.582m15.591 6.513A18.805 18.805 0 0118 10a18.805 18.805 0 01-5.545 7.456M20 16v5h.582m-15.591-6.513A18.805 18.805 0 016 14a18.805 18.805 0 015.545-7.456"></path>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Speed Gauge -->
+    <div class="relative flex flex-col items-center justify-center -mt-8 mx-6 sm:mx-0">
+      <div class="gauge-container-large mb-2">
+        <svg viewBox="0 0 100 100">
+          <circle class="gauge-background" cx="50" cy="50" r="45" pathLength="100"></circle>
+          <circle id="speed-arc" class="gauge-arc" cx="50" cy="50" r="45" pathLength="100" stroke="#38A169"></circle>
+        </svg>
+        <div class="gauge-center">
+          <p id="speed-value" class="text-6xl font-bold text-green-300">0</p>
+          <p id="unit-label" class="text-lg text-green-400 mt-1 font-medium">km/h</p>
+        </div>
+        <div class="gauge-bottom flex space-x-4">
+          <button id="start-button" class="bg-green-600 text-white font-bold p-4 rounded-full shadow-lg hover:bg-green-500 transition-colors duration-200">
+            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"></path>
+            </svg>
+          </button>
+          <button id="stop-button" class="bg-red-600 text-white font-bold p-4 rounded-full shadow-lg hover:bg-red-500 transition-colors duration-200 hidden">
+            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8 7a1 1 0 00-1 1v4a1 1 0 102 0V8a1 1 0 00-1-1zM13 7a1 1 0 00-1 1v4a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+            </svg>
+          </button>
+        </div>
+      </div>
+      <p class="mt-4 text-sm text-gray-400 font-semibold">Speed</p>
+    </div>
+
+    <!-- Duration Gauge -->
+    <div class="relative flex flex-col items-center justify-center w-full sm:w-auto mt-8 sm:mt-0">
+      <div class="absolute -top-10 right-0 flex items-center space-x-2 text-gray-500 font-medium">
+        <span id="battery-icon">🔋</span>
+        <p id="battery-text">--%</p>
+      </div>
+      <div class="gauge-container-small mb-2">
+        <svg viewBox="0 0 100 100">
+          <circle class="gauge-background" cx="50" cy="50" r="45" pathLength="100"></circle>
+          <circle id="time-arc" class="gauge-arc" cx="50" cy="50" r="45" pathLength="100" stroke="url(#distanceGradient)"></circle>
+        </svg>
+        <div class="gauge-center">
+          <p id="time-value" class="text-3xl font-bold text-green-400">00:00</p>
+        </div>
+      </div>
+      <p class="mt-4 text-xs text-gray-400 font-semibold">Duration</p>
+      <button id="fullscreen-toggle" class="bg-slate-700 text-white font-bold p-3 rounded-full shadow-lg hover:bg-slate-600 transition-colors duration-200 mt-4">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5m0 0l-5 5m5-5l5 5m0 0v4m0 0h-4m0 0l-5 5m5-5v4m0 0h-4"></path>
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <p id="status-message" class="text-center text-lg text-gray-400 font-medium tracking-wide">Waiting for GPS signal...</p>
+</div>
+
+<script>
+  // Namespace for app state and functions
+  const DashboardApp = {
+    // DOM refs
+    speedValue: document.getElementById("speed-value"),
+    unitLabel: document.getElementById("unit-label"),
+    distanceValue: document.getElementById("distance-value"),
+    timeValue: document.getElementById("time-value"),
+    startBtn: document.getElementById("start-button"),
+    stopBtn: document.getElementById("stop-button"),
+    unitToggle: document.getElementById("unit-toggle"),
+    fullscreenToggle: document.getElementById("fullscreen-toggle"),
+    gpsIndicator: document.getElementById("gps-indicator"),
+    gpsText: document.getElementById("gps-text"),
+    statusMessage: document.getElementById("status-message"),
+    speedArc: document.getElementById("speed-arc"),
+    distanceArc: document.getElementById("distance-arc"),
+    timeArc: document.getElementById("time-arc"),
+    batteryText: document.getElementById("battery-text"),
+
+    // State
+    watchId: null,
+    isMetric: true,
+    lastPos: null,
+    distance: 0,
+    duration: 0,
+    timerInterval: null,
+    speedHistory: [],
+    SMOOTHING_WINDOW_SIZE: 10,
+    ALPHA: 0.3, // Smoothing factor for exponential smoothing
+
+    // Helpers
+    haversine(lat1, lon1, lat2, lon2) {
+      const R = 6371000, toRad = deg => (deg * Math.PI) / 180;
+      const dLat = toRad(lat2 - lat1), dLon = toRad(lon2 - lon1);
+      const a = Math.sin(dLat / 2) ** 2 + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) ** 2;
+      return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    },
+    formatTime(secs) {
+      const m = String(Math.floor(secs / 60)).padStart(2, "0");
+      const s = String(secs % 60).padStart(2, "0");
+      return `${m}:${s}`;
+    },
+    speedToColor(kph) {
+      if (kph < 20) return "#38A169"; // green
+      if (kph < 35) return "#FBBF24"; // yellow
+      return "#EF4444"; // red
+    },
+
+    updateSpeed(mps) {
+      if (!mps || mps < 0) mps = 0;
+      // Exponential smoothing: smoothed = alpha * new + (1 - alpha) * previous
+      const newSpeed = this.speedHistory.length > 0 ? 
+        this.ALPHA * mps + (1 - this.ALPHA) * this.speedHistory[this.speedHistory.length - 1] : mps;
+      this.speedHistory.push(newSpeed);
+      if (this.speedHistory.length > this.SMOOTHING_WINDOW_SIZE) this.speedHistory.shift();
+
+      const avgMps = this.speedHistory.reduce((a, b) => a + b, 0) / this.speedHistory.length;
+      const val = this.isMetric ? (avgMps * 3.6).toFixed(1) : (avgMps * 2.23694).toFixed(1);
+      this.unitLabel.textContent = this.isMetric ? "km/h" : "mph";
+      this.speedValue.textContent = val;
+
+      // update arc & color dynamically
+      this.speedArc.style.stroke = this.speedToColor(parseFloat(val));
+      const pct = Math.min((val / 50) * 75, 75);
+      this.speedArc.style.strokeDasharray = `${pct} 100`;
+    },
+
+    updateDistance() {
+      const val = this.isMetric ? (this.distance / 1000).toFixed(2) : (this.distance * 0.000621371).toFixed(2);
+      this.distanceValue.textContent = val;
+      const pct = Math.min(((this.isMetric ? this.distance / 1000 : this.distance * 0.000621371) / 100) * 75, 75);
+      this.distanceArc.style.strokeDasharray = `${pct} 100`;
+    },
+
+    updateTime() {
+      this.timeValue.textContent = this.formatTime(this.duration);
+      const pct = Math.min((this.duration / 3600) * 75, 75);
+      this.timeArc.style.strokeDasharray = `${pct} 100`;
+    },
+
+    success(pos) {
+      const { latitude, longitude, speed, accuracy } = pos.coords;
+
+      // Use accuracy-based filtering
+      if (accuracy > 20) {
+        this.gpsIndicator.className = "w-3 h-3 rounded-full bg-yellow-500";
+        this.gpsText.textContent = "Low Accuracy";
+        this.statusMessage.textContent = "Low GPS Accuracy. Waiting for a better signal...";
+        return;
+      }
+
+      if (this.lastPos) {
+        const d = this.haversine(this.lastPos.latitude, this.lastPos.longitude, latitude, longitude);
+        // Accumulate all distances greater than 0.1m to handle slow movements
+        if (d > 0.1) this.distance += d;
+      }
+      this.lastPos = { latitude, longitude };
+
+      this.updateDistance();
+      this.updateSpeed(speed || 0);
+
+      this.gpsIndicator.className = "w-3 h-3 rounded-full bg-green-500 shadow-lg shadow-green-500/50";
+      this.gpsText.textContent = "GPS Active";
+      this.statusMessage.textContent = "Tracking in progress...";
+    },
+
+    error(e) {
+      this.gpsIndicator.className = "w-3 h-3 rounded-full bg-red-500";
+      this.gpsText.textContent = "GPS Error";
+      this.statusMessage.textContent = "GPS Error: " + e.message;
+    },
+
+    startTracking() {
+      this.distance = 0; 
+      this.duration = 0; 
+      this.lastPos = null;
+      this.speedHistory = [];
+      this.updateDistance(); 
+      this.updateTime();
+      if (!navigator.geolocation) {
+        this.statusMessage.textContent = "Geolocation not supported.";
+        return;
+      }
+      this.watchId = navigator.geolocation.watchPosition(
+        pos => this.success(pos), 
+        err => this.error(err), 
+        { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 } // Increased timeout
+      );
+      this.startBtn.classList.add("hidden");
+      this.stopBtn.classList.remove("hidden");
+      this.startBtn.parentElement.classList.add("active-state"); // Visual feedback
+      this.timerInterval = setInterval(() => { this.duration++; this.updateTime(); }, 1000);
+    },
+
+    stopTracking() {
+      if (this.watchId) navigator.geolocation.clearWatch(this.watchId);
+      this.watchId = null;
+      clearInterval(this.timerInterval);
+      this.startBtn.classList.remove("hidden");
+      this.stopBtn.classList.add("hidden");
+      this.startBtn.parentElement.classList.remove("active-state");
+      this.statusMessage.textContent = "Tracking stopped.";
+      this.speedHistory = [];
+    },
+
+    toggleUnits() {
+      this.isMetric = !this.isMetric;
+      this.updateDistance();
+    },
+
+    toggleFullscreen() {
+      const dashboardElement = document.getElementById("dashboard");
+      if (!document.fullscreenElement) {
+        dashboardElement.requestFullscreen().catch(err => console.error(err));
+        this.fullscreenToggle.innerHTML = '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>'; // Exit icon
+      } else {
+        document.exitFullscreen();
+        this.fullscreenToggle.innerHTML = '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5m0 0l-5 5m5-5l5 5m0 0v4m0 0h-4m0 0l-5 5m5-5v4m0 0h-4"></path></svg>'; // Fullscreen icon
+      }
+    },
+
+    initBattery() {
+      if (navigator.getBattery) {
+        navigator.getBattery().then(battery => {
+          const updateBattery = () => {
+            this.batteryText.textContent = `${(battery.level * 100).toFixed(0)}% ${battery.charging ? "(⚡)" : ""}`;
+          };
+          updateBattery();
+          battery.addEventListener("levelchange", updateBattery);
+          battery.addEventListener("chargingchange", updateBattery);
+        });
+      }
+    },
+
+    initEventListeners() {
+      this.startBtn.addEventListener("click", () => this.startTracking());
+      this.stopBtn.addEventListener("click", () => this.stopTracking());
+      this.unitToggle.addEventListener("click", () => this.toggleUnits());
+      this.fullscreenToggle.addEventListener("click", () => this.toggleFullscreen());
+    },
+
+    init() {
+      this.initBattery();
+      this.initEventListeners();
+    }
+  };
+
+  if ("serviceWorker" in navigator) {
+    window.addEventListener("load", function() {
+      navigator.serviceWorker.register("service-worker.js");
+    });
+  }
+
+  // Initialize the app
+  DashboardApp.init();
+</script>
+
+</body>
+</html>
